@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AEGIS</string>
+    <string name="app_tagline">Intelligent Safety. Instant Response.</string>
+    <string name="channel_alerts">AEGIS Alerts</string>
+    <string name="channel_emergency">Emergency</string>
+    <string name="channel_location">Location Sharing</string>
+    <string name="channel_system">System</string>
+    <string name="emergency_location_active">Emergency Location Sharing</string>
+    <string name="sharing_live_location">Sharing your live location with AEGIS dispatch</string>
+
+    <!-- Voice trigger -->
+    <string name="voice_trigger_title">Voice trigger active</string>
+    <string name="voice_trigger_listening">Listening locally for the wake phrase</string>
+
+    <!-- Auto-detection monitoring -->
+    <string name="monitoring_notification_title">Safety monitoring active</string>
+    <string name="monitoring_notification_body">Running locally on your device</string>
+    <string name="monitoring_prompt_title">ARE YOU OKAY?</string>
+    <string name="monitoring_prompt_subtitle">AEGIS detected a possible safety event.</string>
+    <string name="monitoring_prompt_im_ok">I\'M OK</string>
+    <string name="monitoring_prompt_send_help">SEND HELP NOW</string>
+    <string name="monitoring_settings_title">Automatic Detection</string>
+    <string name="monitoring_enable_label">Enable monitoring</string>
+    <string name="monitoring_enable_description">Runs locally on your device. Nothing is uploaded unless an event is escalated.</string>
+    <string name="monitoring_signal_audio">Audio (distress vocalization)</string>
+    <string name="monitoring_signal_motion">Motion (fall / collapse)</string>
+    <string name="monitoring_signal_vision">Vision (pose-based fall)</string>
+    <string name="monitoring_sensitivity_label">Sensitivity</string>
+    <string name="monitoring_confirmation_label">Confirmation window</string>
+    <string name="monitoring_confirmation_description">Before any escalation, AEGIS will ask \"Are you OK?\" for this many seconds.</string>
+    <string name="monitoring_safety_notice">AEGIS never calls emergency services on its own. Every AI escalation opens a confirmation prompt — nothing is sent until you (or the timer) confirm.</string>
+
+    <!--
+        REPLACE THIS WITH YOUR OWN GOOGLE MAPS API KEY.
+        Get one at: https://console.cloud.google.com/google/maps-apis
+        Enable "Maps SDK for Android" and restrict the key to your package + SHA-1.
+    -->
+    <string name="google_maps_api_key">AIzaSyCB3PKPgqgogJgGztZLxy_g_nFYr98mHWA</string>
+</resources>

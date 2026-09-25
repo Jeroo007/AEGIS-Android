@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="aegis_primary">#0B3D91</color>
+    <color name="aegis_secondary">#1E88E5</color>
+    <color name="aegis_accent">#FFB300</color>
+    <color name="aegis_danger">#D32F2F</color>
+    <color name="aegis_safe">#2E7D32</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>

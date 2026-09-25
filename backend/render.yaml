@@ -1,0 +1,23 @@
+databases:
+  - name: aegis-db
+    plan: free
+    databaseName: aegis
+    user: aegis_user
+    region: ohio
+    postgresMajorVersion: 15
+
+services:
+  - type: web
+    name: aegis-backend
+    runtime: python
+    plan: free
+    region: ohio
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: aegis-db
+          property: connectionString
+      - key: PYTHON_VERSION
+        value: 3.11.9

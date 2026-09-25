@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AEGIS · Control Room</title>
+<style>
+  :root {
+    --navy: #0B1220;
+    --navy-2: #10192c;
+    --navy-3: #1a2332;
+    --cyan: #22D3EE;
+    --red: #D32F2F;
+    --green: #22C55E;
+    --amber: #FFB300;
+    --text: #ffffff;
+    --text-dim: #94a3b8;
+    --border: #1f2a3a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+    background: var(--navy);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  .layout { display: flex; min-height: 100vh; }
+
+  .sidebar {
+    width: 240px;
+    background: var(--navy-2);
+    border-right: 1px solid var(--border);
+    padding: 24px 0;
+    flex-shrink: 0;
+  }
+  .logo {
+    padding: 0 24px 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+  .logo-mark {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 2px;
+  }
+  .logo-mark svg { width: 28px; height: 28px; }
+  .logo-sub {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    letter-spacing: 0.5px;
+    font-family: ui-monospace, monospace;
+  }
+  .nav-item {
+    padding: 12px 24px;
+    cursor: pointer;
+    color: var(--text-dim);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.15s;
+    border-left: 3px solid transparent;
+  }
+  .nav-item:hover { background: var(--navy-3); color: var(--text); }
+  .nav-item.active {
+    color: var(--cyan);
+    border-left-color: var(--cyan);
+    background: var(--navy-3);
+  }
+  .nav-item .icon { font-size: 16px; }
+
+  .main {
+    flex: 1;
+    padding: 32px 40px;
+    overflow-y: auto;
+    max-height: 100vh;
+  }
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+  }
+  .header h1 { font-size: 24px; font-weight: 600; }
+  .header .status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-dim);
+    font-family: ui-monospace, monospace;
+  }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .stat {
+    background: var(--navy-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--cyan);
+  }
+  .stat-value.red { color: var(--red); }
+  .stat-value.green { color: var(--green); }
+
+  .card {
+    background: var(--navy-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .card-title { font-size: 14px; font-weight: 600; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    text-align: left;
+    color: var(--text-dim);
+    font-weight: 500;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--navy-3); }
+
+  .pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: ui-monospace, monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .pill-critical { background: rgba(211,47,47,0.15); color: #ff6b6b; }
+  .pill-high { background: rgba(255,179,0,0.15); color: var(--amber); }
+  .pill-medium { background: rgba(34,211,238,0.15); color: var(--cyan); }
+  .pill-created { background: rgba(34,211,238,0.15); color: var(--cyan); }
+  .pill-active { background: rgba(255,179,0,0.15); color: var(--amber); }
+  .pill-resolved { background: rgba(34,197,94,0.15); color: var(--green); }
+  .pill-cancelled { background: rgba(148,163,184,0.15); color: var(--text-dim); }
+  .pill-police_station { background: rgba(59,130,246,0.15); color: #60a5fa; }
+  .pill-hospital { background: rgba(239,68,68,0.15); color: #f87171; }
+  .pill-transit { background: rgba(168,85,247,0.15); color: #c084fc; }
+
+  .empty {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 13px;
+  }
+
+  .coords {
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+    color: var(--cyan);
+  }
+
+  .btn {
+    background: var(--cyan);
+    color: var(--navy);
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .btn:hover { opacity: 0.85; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { color: var(--text); border-color: var(--cyan); }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .refresh-note {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-family: ui-monospace, monospace;
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="2">
+          <path d="M12 2L4 6v6c0 5 3.4 9.7 8 10 4.6-.3 8-5 8-10V6l-8-4z"/>
+        </svg>
+        AEGIS
+      </div>
+      <div class="logo-sub">CONTROL ROOM</div>
+    </div>
+    <div class="nav-item active" data-page="overview">
+      <span class="icon">◉</span> Overview
+    </div>
+    <div class="nav-item" data-page="incidents">
+      <span class="icon">⚠</span> Incidents
+    </div>
+    <div class="nav-item" data-page="users">
+      <span class="icon">◐</span> Users
+    </div>
+    <div class="nav-item" data-page="safezones">
+      <span class="icon">⌂</span> Safe Zones
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="header">
+      <h1 id="pageTitle">Overview</h1>
+      <div class="status">
+        <span class="dot"></span>
+        <span>LIVE</span>
+        <span class="refresh-note" id="lastRefresh"></span>
+      </div>
+    </div>
+
+    <div class="page active" id="page-overview">
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Total Users</div>
+          <div class="stat-value" id="statUsers">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Active Incidents</div>
+          <div class="stat-value red" id="statActive">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Resolved</div>
+          <div class="stat-value green" id="statResolved">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Safe Zones</div>
+          <div class="stat-value" id="statZones">—</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Recent Incidents</div>
+        </div>
+        <div id="recentIncidents">
+          <div class="empty">Loading…</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-incidents">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">All Incidents</div>
+          <button class="btn btn-ghost" onclick="loadIncidents()">Refresh</button>
+        </div>
+        <div id="incidentsList">
+          <div class="empty">Loading…</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-users">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Registered Users</div>
+          <button class="btn btn-ghost" onclick="loadUsers()">Refresh</button>
+        </div>
+        <div id="usersList">
+          <div class="empty">Loading…</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-safezones">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Safe Zones</div>
+          <button class="btn btn-ghost" onclick="loadZones()">Refresh</button>
+        </div>
+        <div id="zonesList">
+          <div class="empty">Loading…</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const API = '';
+
+function pillClass(value) {
+  return 'pill pill-' + String(value).toLowerCase();
+}
+
+function formatTime(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  const now = new Date();
+  const diff = (now - d) / 1000;
+  if (diff < 60) return Math.floor(diff) + 's ago';
+  if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+  if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+  return d.toLocaleDateString();
+}
+
+async function api(path) {
+  const r = await fetch(API + path);
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return r.json();
+}
+
+async function loadStats() {
+  try {
+    const s = await api('/api/v1/admin/stats');
+    document.getElementById('statUsers').textContent = s.total_users;
+    document.getElementById('statActive').textContent = s.active_incidents;
+    document.getElementById('statResolved').textContent = s.resolved_incidents;
+    document.getElementById('statZones').textContent = s.total_safe_zones;
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function renderIncidentsTable(incidents, compact) {
+  if (!incidents.length) return '<div class="empty">No incidents yet.</div>';
+  const rows = incidents.map(i => `
+    <tr>
+      <td><span class="${pillClass(i.severity)}">${i.severity}</span></td>
+      <td><span class="${pillClass(i.type === 'MANUAL_SOS' ? 'critical' : 'high')}">${i.type.replace(/_/g,' ')}</span></td>
+      <td>${i.user_name}<br><span style="color:var(--text-dim);font-size:11px;">${i.user_email}</span></td>
+      <td>${i.latitude != null ? `<span class="coords">${i.latitude.toFixed(4)}, ${i.longitude.toFixed(4)}</span>` : '—'}</td>
+      <td><span class="${pillClass(i.status.toLowerCase())}">${i.status}</span></td>
+      <td>${formatTime(i.created_at)}</td>
+      <td>${!compact && i.status !== 'RESOLVED' && i.status !== 'CANCELLED'
+        ? `<button class="btn" onclick="resolveIncident('${i.id}')">Resolve</button>` : ''}</td>
+    </tr>
+  `).join('');
+  return `
+    <table>
+      <thead>
+        <tr>
+          <th>Severity</th>
+          <th>Type</th>
+          <th>User</th>
+          <th>Location</th>
+          <th>Status</th>
+          <th>Time</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+async function loadIncidents() {
+  try {
+    const incidents = await api('/api/v1/admin/incidents?limit=100');
+    document.getElementById('incidentsList').innerHTML = renderIncidentsTable(incidents, false);
+    const recent = incidents.slice(0, 5);
+    document.getElementById('recentIncidents').innerHTML = renderIncidentsTable(recent, true);
+  } catch (e) {
+    document.getElementById('incidentsList').innerHTML = '<div class="empty">Failed to load: ' + e.message + '</div>';
+  }
+}
+
+async function resolveIncident(id) {
+  if (!confirm('Mark this incident as RESOLVED?')) return;
+  await fetch(API + '/api/v1/admin/incidents/' + id + '/resolve', { method: 'POST' });
+  loadIncidents();
+  loadStats();
+}
+
+async function loadUsers() {
+  try {
+    const users = await api('/api/v1/admin/users');
+    if (!users.length) {
+      document.getElementById('usersList').innerHTML = '<div class="empty">No users yet. Register via the app or /docs.</div>';
+      return;
+    }
+    const rows = users.map(u => `
+      <tr>
+        <td>${u.full_name}</td>
+        <td style="font-family:ui-monospace,monospace;font-size:12px;color:var(--cyan)">${u.email}</td>
+        <td>${u.phone_number || '—'}</td>
+        <td><span class="${pillClass('medium')}">${u.role}</span></td>
+        <td>${formatTime(u.created_at)}</td>
+      </tr>
+    `).join('');
+    document.getElementById('usersList').innerHTML = `
+      <table>
+        <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Joined</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  } catch (e) {
+    document.getElementById('usersList').innerHTML = '<div class="empty">Failed to load: ' + e.message + '</div>';
+  }
+}
+
+async function loadZones() {
+  try {
+    const zones = await api('/api/v1/admin/safe-zones');
+    if (!zones.length) {
+      document.getElementById('zonesList').innerHTML = '<div class="empty">No safe zones seeded.</div>';
+      return;
+    }
+    const rows = zones.map(z => `
+      <tr>
+        <td>${z.name}</td>
+        <td><span class="${pillClass(z.type.toLowerCase())}">${z.type.replace(/_/g,' ')}</span></td>
+        <td><span class="coords">${z.latitude.toFixed(4)}, ${z.longitude.toFixed(4)}</span></td>
+        <td style="font-family:ui-monospace,monospace;font-size:12px">${z.phone_number || '—'}</td>
+        <td>${z.open_24h ? '<span class="pill pill-resolved">24h</span>' : '—'}</td>
+      </tr>
+    `).join('');
+    document.getElementById('zonesList').innerHTML = `
+      <table>
+        <thead><tr><th>Name</th><th>Type</th><th>Location</th><th>Phone</th><th>Hours</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  } catch (e) {
+    document.getElementById('zonesList').innerHTML = '<div class="empty">Failed to load: ' + e.message + '</div>';
+  }
+}
+
+document.querySelectorAll('.nav-item').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    const page = el.dataset.page;
+    document.getElementById('page-' + page).classList.add('active');
+    document.getElementById('pageTitle').textContent = el.textContent.trim();
+    if (page === 'overview') { loadStats(); loadIncidents(); }
+    if (page === 'incidents') loadIncidents();
+    if (page === 'users') loadUsers();
+    if (page === 'safezones') loadZones();
+  });
+});
+
+loadStats();
+loadIncidents();
+
+setInterval(() => {
+  document.getElementById('lastRefresh').textContent = 'refreshed ' + new Date().toLocaleTimeString();
+  loadStats();
+  loadIncidents();
+}, 5000);
+</script>
+</body>
+</html>
